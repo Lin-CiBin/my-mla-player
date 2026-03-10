@@ -1,5 +1,16 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import {
+  Heart,
+  ListMusic,
+  Pause,
+  Play,
+  Repeat,
+  SkipBack,
+  SkipForward,
+  Volume1,
+  Volume2,
+} from "lucide-react";
 
 const COVER = "/images/Tell_Tale_Heart.jpg";
 
@@ -35,6 +46,22 @@ export default function MusicPlayer() {
   // 【新增】拖拽锁，防止 onTimeUpdate 与手动拖拽冲突
   const isDragging = useRef<boolean>(false); 
   const track: Track = TRACKS[idx];
+
+  // 为移动端修正 100vh，适配不同手机真实可视高度
+  useEffect(() => {
+    const setVh = () => {
+      if (typeof window === "undefined") return;
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+    setVh();
+    window.addEventListener("resize", setVh);
+    window.addEventListener("orientationchange", setVh);
+    return () => {
+      window.removeEventListener("resize", setVh);
+      window.removeEventListener("orientationchange", setVh);
+    };
+  }, []);
 
   // 1. 播放/暂停控制
   useEffect(() => {
@@ -154,10 +181,27 @@ export default function MusicPlayer() {
         preload="metadata"
       />
 
-      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:16,
-        background:"linear-gradient(150deg,#1a0c06,#2c1508 45%,#180b04)", fontFamily:"'DM Sans',sans-serif" }}>
+      <div style={{
+        minHeight:"calc(var(--vh, 1vh) * 100)",
+        width:"100vw",
+        display:"flex",
+        alignItems:"center",
+        justifyContent:"center",
+        padding:16,
+        background:"linear-gradient(150deg,#1a0c06,#2c1508 45%,#180b04)",
+        fontFamily:"'DM Sans',sans-serif",
+        overflow:"hidden"
+      }}>
 
-        <div style={{ position:"relative", width:"100%", maxWidth:360 }}>
+        <div style={{
+          position:"relative",
+          width:"100%",
+          maxWidth:480,
+          height:"100%",
+          display:"flex",
+          alignItems:"center",
+          justifyContent:"center"
+        }}>
 
           {/* ── QUEUE ── */}
           {queue && (
@@ -226,12 +270,23 @@ export default function MusicPlayer() {
                     color:"#fff", lineHeight:1.1, letterSpacing:"-0.5px", animation:"fadeup .4s ease" }}>{track.title}</h2>
                   <p style={{ fontSize:13, color:"rgba(255,255,255,.42)", margin:"6px 0 0" }}>{track.artist}</p>
                 </div>
-                <button onClick={() => setLiked(!liked)} className="btn-ctrl" style={{
-                  width:36, height:36, fontSize:16,
-                  background: liked ? "rgba(245,166,35,.2)" : "rgba(255,255,255,.07)",
-                  color: liked ? "#f5a623" : "rgba(255,255,255,.35)",
-                  boxShadow: liked ? "0 0 0 1px rgba(245,166,35,.4)" : "0 0 0 1px rgba(255,255,255,.1)" }}>
-                  {liked ? "♥" : "♡"}
+                <button
+                  onClick={() => setLiked(!liked)}
+                  className="btn-ctrl"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    fontSize: 16,
+                    background: liked ? "rgba(245,166,35,.2)" : "rgba(255,255,255,.07)",
+                    color: liked ? "#f5a623" : "rgba(255,255,255,.35)",
+                    boxShadow: liked ? "0 0 0 1px rgba(245,166,35,.4)" : "0 0 0 1px rgba(255,255,255,.1)",
+                  }}
+                >
+                  <Heart
+                    size={18}
+                    fill={liked ? "#f5a623" : "transparent"}
+                    strokeWidth={2}
+                  />
                 </button>
               </div>
 
@@ -270,27 +325,59 @@ export default function MusicPlayer() {
               </div>
 
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:20 }}>
-                <button onClick={() => setQueue(true)} className="btn-ctrl" style={{ width:38, height:38, background:"rgba(255,255,255,.07)", color:"rgba(255,255,255,.45)" }}>☰</button>
-                <button onClick={prev} className="btn-ctrl" style={{ width:44, height:44, background:"rgba(255,255,255,.08)", color:"#fff" }}>⏮</button>
-                <button onClick={() => setPlaying(!playing)} className="btn-ctrl" style={{
-                  width:64, height:64, fontSize:24, color:"#fff",
-                  background:"linear-gradient(135deg,#d85510,#f5a623)",
-                  boxShadow:"0 8px 28px rgba(220,80,16,.5)" }}>
-                  {playing ? "⏸" : "▶"}
+                <button
+                  onClick={() => setQueue(true)}
+                  className="btn-ctrl"
+                  style={{ width:38, height:38, background:"rgba(255,255,255,.07)", color:"rgba(255,255,255,.45)" }}
+                >
+                  <ListMusic size={18} />
                 </button>
-                <button onClick={next} className="btn-ctrl" style={{ width:44, height:44, background:"rgba(255,255,255,.08)", color:"#fff" }}>⏭</button>
-                <button className="btn-ctrl" style={{ width:38, height:38, background:"rgba(255,255,255,.07)", color:"rgba(255,255,255,.45)" }}>↻</button>
+                <button
+                  onClick={prev}
+                  className="btn-ctrl"
+                  style={{ width:44, height:44, background:"rgba(255,255,255,.08)", color:"#fff" }}
+                >
+                  <SkipBack size={22} />
+                </button>
+                <button
+                  onClick={() => setPlaying(!playing)}
+                  className="btn-ctrl"
+                  style={{
+                    width:64, height:64, fontSize:24, color:"#fff",
+                    background:"linear-gradient(135deg,#d85510,#f5a623)",
+                    boxShadow:"0 8px 28px rgba(220,80,16,.5)"
+                  }}
+                >
+                  {playing ? <Pause size={28} /> : <Play size={28} />}
+                </button>
+                <button
+                  onClick={next}
+                  className="btn-ctrl"
+                  style={{ width:44, height:44, background:"rgba(255,255,255,.08)", color:"#fff" }}
+                >
+                  <SkipForward size={22} />
+                </button>
+                <button
+                  className="btn-ctrl"
+                  style={{ width:38, height:38, background:"rgba(255,255,255,.07)", color:"rgba(255,255,255,.45)" }}
+                >
+                  <Repeat size={18} />
+                </button>
               </div>
 
               <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:18 }}>
-                <span style={{ fontSize:12, color:"rgba(255,255,255,.25)" }}>🔈</span>
+                <span style={{ fontSize:12, color:"rgba(255,255,255,.25)", display:"flex", alignItems:"center" }}>
+                  <Volume1 size={16} />
+                </span>
                 <div className="vol-container">
                   <div style={{ position:"absolute", left:0, right:0, height:2, borderRadius:9999, background:"rgba(255,255,255,.1)" }}>
                     <div style={{ height:"100%", width:vol + "%", borderRadius:9999, background:"rgba(255,255,255,.4)" }} />
                   </div>
                   <input type="range" className="vol" min={0} max={100} value={vol} onChange={(e) => setVol(+e.target.value)} />
                 </div>
-                <span style={{ fontSize:12, color:"rgba(255,255,255,.25)" }}>🔊</span>
+                <span style={{ fontSize:12, color:"rgba(255,255,255,.25)", display:"flex", alignItems:"center" }}>
+                  <Volume2 size={18} />
+                </span>
               </div>
             </div>
           </div>
