@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
 import {
   Heart,
   ListMusic,
@@ -7,10 +6,9 @@ import {
   Play,
   Repeat,
   SkipBack,
-  SkipForward,
-  Volume1,
-  Volume2,
+  SkipForward
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const COVER = "/images/Tell_Tale_Heart.jpg";
 
@@ -24,6 +22,9 @@ interface Track {
 
 const TRACKS: Track[] = [
   { id: 1, title: "開放性骨折", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/audio/bone.m4a" },
+  { id: 2, title: "保險推銷員之死", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/audio/deathOfASalesman.m4a" },
+  { id: 3, title: "末日鋼琴手", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/audio/doomsdayPianist.m4a" },
+  { id: 3, title: "崇高与滑稽", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/audio/sublimeAndComic.m4a" },
 ];
 
 function fmt(s: number): string {
@@ -365,7 +366,7 @@ export default function MusicPlayer() {
                 </button>
               </div>
 
-              <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:18 }}>
+              {/* <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:18 }}>
                 <span style={{ fontSize:12, color:"rgba(255,255,255,.25)", display:"flex", alignItems:"center" }}>
                   <Volume1 size={16} />
                 </span>
@@ -378,7 +379,7 @@ export default function MusicPlayer() {
                 <span style={{ fontSize:12, color:"rgba(255,255,255,.25)", display:"flex", alignItems:"center" }}>
                   <Volume2 size={18} />
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

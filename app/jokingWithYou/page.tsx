@@ -6,9 +6,7 @@ import {
   Play,
   Repeat,
   SkipBack,
-  SkipForward,
-  Volume1,
-  Volume2,
+  SkipForward
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -23,8 +21,11 @@ interface Track {
 }
 
 const TRACKS: Track[] = [
-  { id: 1, title: "德州之恋", artist: "My Little Airport", album: "跟你开玩笑", src: "/audio/texasLove.m4a" },
+  { id: 1, title: "德州之戀", artist: "My Little Airport", album: "跟你开玩笑", src: "/audio/texasLove.m4a" },
   { id: 2, title: "呕吐", artist: "My Little Airport", album: "跟你开玩笑", src: "/audio/puke.m4a" },
+  { id: 3, title: "某夜後台", artist: "My Little Airport", album: "跟你开玩笑", src: "/audio/theNightBackstage.m4a" },
+  { id: 4, title: "循環的夜", artist: "My Little Airport", album: "跟你开玩笑", src: "/audio/theRecurringNight.m4a" },
+  { id: 5, title: "我不適合聚會", artist: "My Little Airport", album: "跟你开玩笑", src: "/audio/partyMisfit.m4a" },
 ];
 
 function fmt(s: number): string {
@@ -169,7 +170,7 @@ export default function MusicPlayer() {
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:16,
         background:"linear-gradient(150deg,#1a0c06,#2c1508 45%,#180b04)", fontFamily:"'DM Sans',sans-serif" }}>
 
-        <div style={{ position:"relative", width:"100%", maxWidth:360 }}>
+        <div style={{ position:"relative", width:"100%" }}>
 
           {/* ── QUEUE ── */}
           {queue && (
@@ -333,7 +334,7 @@ export default function MusicPlayer() {
                 </button>
               </div>
 
-              <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:18 }}>
+              {/* <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:18 }}>
                 <span style={{ fontSize:12, color:"rgba(255,255,255,.25)", display:"flex", alignItems:"center" }}>
                   <Volume1 size={16} />
                 </span>
@@ -346,7 +347,7 @@ export default function MusicPlayer() {
                 <span style={{ fontSize:12, color:"rgba(255,255,255,.25)", display:"flex", alignItems:"center" }}>
                   <Volume2 size={18} />
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
