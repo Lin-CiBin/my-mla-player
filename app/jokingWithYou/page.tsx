@@ -28,6 +28,7 @@ const TRACKS: Track[] = [
   { id: 5, title: "我不適合聚會", artist: "My Little Airport", album: "跟你开玩笑", src: "/audio/partyMisfit.m4a" },
 ];
 
+
 function fmt(s: number): string {
   if (!s || isNaN(s) || !isFinite(s)) return "0:00";
   const mins = Math.floor(s / 60);
