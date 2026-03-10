@@ -1,16 +1,16 @@
 "use client";
 import {
-  Heart,
-  ListMusic,
-  Pause,
-  Play,
-  Repeat,
-  SkipBack,
-  SkipForward
+    Heart,
+    ListMusic,
+    Pause,
+    Play,
+    Repeat,
+    SkipBack,
+    SkipForward
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const COVER = "/images/Joking_With_You.jpg";
+const COVER = "/my-mla-player/images/Joking_With_You.jpg";
 
 interface Track {
   id: number;

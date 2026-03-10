@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const COVER = "/images/Tell_Tale_Heart.jpg";
+const COVER = "/my-mla-player/images/Tell_Tale_Heart.jpg";
 
 interface Track {
   id: number;
@@ -21,10 +21,10 @@ interface Track {
 }
 
 const TRACKS: Track[] = [
-  { id: 1, title: "開放性骨折", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/audio/bone.m4a" },
-  { id: 2, title: "保險推銷員之死", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/audio/deathOfASalesman.m4a" },
-  { id: 3, title: "末日鋼琴手", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/audio/doomsdayPianist.m4a" },
-  { id: 3, title: "崇高与滑稽", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/audio/sublimeAndComic.m4a" },
+  { id: 1, title: "開放性骨折", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/my-mla-player/audio/bone.m4a" },
+  { id: 2, title: "保險推銷員之死", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/my-mla-player/audio/deathOfASalesman.m4a" },
+  { id: 3, title: "末日鋼琴手", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/my-mla-player/audio/doomsdayPianist.m4a" },
+  { id: 3, title: "崇高与滑稽", artist: "Tizzy Bac", album: "The Tell Tale Heart", src: "/my-mla-player/audio/sublimeAndComic.m4a" },
 ];
 
 function fmt(s: number): string {
