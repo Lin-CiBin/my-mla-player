@@ -148,7 +148,7 @@ function PlayerContent() {
         onEnded={next} preload="metadata" 
       />
 
-      <div style={{ position: "relative", width: "100%", maxWidth: 400 }}>
+      <div style={{ position: "relative", width: "100%" }}>
         {/* QUEUE */}
         {queue && (
           <div style={{ position: "absolute", inset: 0, zIndex: 20, borderRadius: 28, background: "rgba(10,5,2,.98)", border: "1px solid rgba(245,166,35,.15)", padding: 24, animation: "qslide .25s ease" }}>
