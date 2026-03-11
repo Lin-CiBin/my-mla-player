@@ -24,8 +24,8 @@ const LIBRARIES: Record<string, any> = {
     ]
   },
   "mla": {
-    cover: "/my-mla-player/images/mla_cover.jpg",
-    theme: "linear-gradient(150deg,#0d1a06,#152c08 45%,#0b1804)",
+    cover: "/my-mla-player/images/Joking_With_You.jpg",
+    theme: "linear-gradient(150deg,#1a0c06,#2c1508 45%,#180b04)",
     tracks: [
       { id: 1, title: "德州之戀", artist: "My Little Airport", album: "跟你开玩笑", src: "/my-mla-player/audio/texasLove.m4a" },
       { id: 2, title: "呕吐", artist: "My Little Airport", album: "跟你开玩笑", src: "/my-mla-player/audio/puke.m4a" },
