@@ -44,20 +44,11 @@ export default function MusicPlayer() {
   const [queue, setQueue] = useState<boolean>(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // 【新增】拖拽锁，防止 onTimeUpdate 与手动拖拽冲突
   const isDragging = useRef<boolean>(false); 
   const track: Track = TRACKS[idx];
 
-  // ── 【核心逻辑：URL 洗白】 ──
-  useEffect(() => {
-    // 延迟极短的时间或直接执行，将地址栏修改为父级目录
-    // 这样用户扫码进入 /tizzyBac/ 后，地址栏会立刻变成 /my-mla-player/
-    if (typeof window !== "undefined") {
-      const parentPath = window.location.pathname.replace(/\/tizzyBac\/?$/, "/");
-      window.history.replaceState({}, "", parentPath);
-    }
-  }, []);
-
-  // 为移动端修正 100vh
+  // 为移动端修正 100vh，适配不同手机真实可视高度
   useEffect(() => {
     const setVh = () => {
       if (typeof window === "undefined") return;
@@ -94,10 +85,13 @@ export default function MusicPlayer() {
     }
   }, [vol]);
 
-  const safeDur = dur > 0 ? dur : 100; 
+  // 3. 核心计算：使用安全时长，防止除以 0
+  const safeDur = dur > 0 ? dur : 100; // 如果还没加载出时长，默认给 100 保证可拖动
   const pct = (cur / safeDur) * 100;
 
+  // 4. 音频事件处理
   const onTimeUpdate = () => {
+    // 【关键】如果用户正在拖拽，绝不允许音频进度覆盖我们拖拽的进度！
     if (audioRef.current && !isDragging.current) {
       setCur(audioRef.current.currentTime);
     }
@@ -110,11 +104,23 @@ export default function MusicPlayer() {
     }
   };
 
-  const handleSeekStart = () => { isDragging.current = true; };
-  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => { setCur(parseFloat(e.target.value)); };
+  // 5. 进度跳转逻辑拆分：按下、拖动、松开
+  const handleSeekStart = () => {
+    isDragging.current = true;
+  };
+
+  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCur(parseFloat(e.target.value)); // 拖动时只更新 UI，不碰硬件音频
+  };
+
   const handleSeekEnd = () => {
-    if (audioRef.current) { audioRef.current.currentTime = cur; }
-    setTimeout(() => { isDragging.current = false; }, 50);
+    if (audioRef.current) {
+      audioRef.current.currentTime = cur; // 松手时，一次性把进度同步给硬件
+    }
+    // 延迟 50ms 解锁，防止底层 onTimeUpdate 刚好在这个微秒差里传回旧数据导致闪烁
+    setTimeout(() => {
+      isDragging.current = false;
+    }, 50);
   };
 
   function goTo(i: number): void {
@@ -165,6 +171,7 @@ export default function MusicPlayer() {
         .btn-ctrl:active { transform:scale(.94); }
       `}</style>
 
+      {/* 音频标签 */}
       <audio 
         ref={audioRef}
         src={track.src}
@@ -293,6 +300,7 @@ export default function MusicPlayer() {
                 ))}
               </div>
 
+              {/* 进度条：加入锁定机制 */}
               <div className="seek-container">
                 <div style={{ position:"absolute", left:0, right:0, height:3, borderRadius:9999, background:"rgba(255,255,255,.12)" }}>
                   <div style={{ height:"100%", width: pct + "%", borderRadius:9999,
@@ -303,11 +311,11 @@ export default function MusicPlayer() {
                   max={safeDur} 
                   step={0.1} 
                   value={cur} 
-                  onPointerDown={handleSeekStart} 
-                  onChange={handleSeekChange} 
-                  onPointerUp={handleSeekEnd} 
-                  onTouchStart={handleSeekStart} 
-                  onTouchEnd={handleSeekEnd} 
+                  onPointerDown={handleSeekStart} // 鼠标/手指按下上锁
+                  onChange={handleSeekChange}     // 拖动时只改 UI
+                  onPointerUp={handleSeekEnd}     // 鼠标/手指松开解锁并提交
+                  onTouchStart={handleSeekStart}  // 兼容老设备
+                  onTouchEnd={handleSeekEnd}      // 兼容老设备
                 />
               </div>
 
@@ -356,6 +364,21 @@ export default function MusicPlayer() {
                   <Repeat size={18} />
                 </button>
               </div>
+
+              {/* <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:18 }}>
+                <span style={{ fontSize:12, color:"rgba(255,255,255,.25)", display:"flex", alignItems:"center" }}>
+                  <Volume1 size={16} />
+                </span>
+                <div className="vol-container">
+                  <div style={{ position:"absolute", left:0, right:0, height:2, borderRadius:9999, background:"rgba(255,255,255,.1)" }}>
+                    <div style={{ height:"100%", width:vol + "%", borderRadius:9999, background:"rgba(255,255,255,.4)" }} />
+                  </div>
+                  <input type="range" className="vol" min={0} max={100} value={vol} onChange={(e) => setVol(+e.target.value)} />
+                </div>
+                <span style={{ fontSize:12, color:"rgba(255,255,255,.25)", display:"flex", alignItems:"center" }}>
+                  <Volume2 size={18} />
+                </span>
+              </div> */}
             </div>
           </div>
         </div>
