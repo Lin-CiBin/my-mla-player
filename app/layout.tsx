@@ -1,5 +1,5 @@
 // src/app/layout.tsx
-
+import './globals.css'; // 必须引入
 export default function RootLayout({
   children,
 }: {
@@ -7,7 +7,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh">
-      <body style={{ margin: 0 }}>
+      <body className="m-0 p-0">
         {/* children 就是你的 MusicPlayer 页面内容 */}
         {children}
       </body>
