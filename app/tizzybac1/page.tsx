@@ -197,7 +197,6 @@ export default function MusicPlayer() {
         <div style={{
           position:"relative",
           width:"100%",
-          maxWidth:480,
           height:"100%",
           display:"flex",
           alignItems:"center",
