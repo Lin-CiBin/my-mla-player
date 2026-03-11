@@ -7,7 +7,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh">
-      <body>
+      <body style={{ margin: 0 }}>
         {/* children 就是你的 MusicPlayer 页面内容 */}
         {children}
       </body>
