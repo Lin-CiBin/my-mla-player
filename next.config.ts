@@ -6,6 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,   // 必须：静态导出不支持图片优化
   },
+  productionBrowserSourceMaps: true,
 };
 
 export default nextConfig;
