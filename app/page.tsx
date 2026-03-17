@@ -5,6 +5,8 @@ import {
   Pause,
   Play,
   Repeat,
+  Repeat1,
+  Shuffle,
   SkipBack,
   SkipForward,
 } from "lucide-react";
@@ -17,92 +19,29 @@ const LIBRARIES: Record<string, any> = {
     cover: "/my-mla-player/images/Tell_Tale_Heart.jpg",
     theme: "linear-gradient(150deg,#1a0c06,#2c1508 45%,#180b04)",
     tracks: [
-      {
-        id: 1,
-        title: "開放性骨折",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/bone.m4a",
-      },
-      {
-        id: 2,
-        title: "保險推銷員之死",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/deathOfASalesman.m4a",
-      },
-      {
-        id: 3,
-        title: "末日鋼琴手",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/doomsdayPianist.m4a",
-      },
-      {
-        id: 4,
-        title: "崇高與滑稽",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/sublimeAndComic.m4a",
-      },
-      {
-        id: 5,
-        title: "周日午後婦女的時間",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/womenTime.m4a",
-      },
-      {
-        id: 6,
-        title: "忘記丟掉",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/forgetThrow.m4a",
-      },
-      {
-        id: 7,
-        title: "Every Dogs has it's lawn",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/dogsLawn.m4a",
-      },
+      { id: 1, title: "開放性骨折", artist: "Tizzy Bac", src: "/my-mla-player/audio/bone.m4a" },
+      { id: 2, title: "保險推銷員之死", artist: "Tizzy Bac", src: "/my-mla-player/audio/deathOfASalesman.m4a" },
+      { id: 3, title: "末日鋼琴手", artist: "Tizzy Bac", src: "/my-mla-player/audio/doomsdayPianist.m4a" },
+      { id: 4, title: "崇高與滑稽", artist: "Tizzy Bac", src: "/my-mla-player/audio/sublimeAndComic.m4a" },
+      { id: 5, title: "周日午後婦女的時間", artist: "Tizzy Bac", src: "/my-mla-player/audio/womenTime.m4a" },
+      { id: 6, title: "忘記丟掉", artist: "Tizzy Bac", src: "/my-mla-player/audio/forgetThrow.m4a" },
+      { id: 7, title: "Every Dogs has it's lawn", artist: "Tizzy Bac", src: "/my-mla-player/audio/dogsLawn.m4a" },
     ],
   },
   mla: {
     cover: "/my-mla-player/images/Joking_With_You.jpg",
     theme: "linear-gradient(150deg,#1a0c06,#2c1508 45%,#180b04)",
     tracks: [
-      {
-        id: 1,
-        title: "德州之戀",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/texasLove.m4a",
-      },
-      {
-        id: 2,
-        title: "嘔吐",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/puke.m4a",
-      },
-      {
-        id: 3,
-        title: "某夜後台",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/thatNightBackstage.m4a",
-      },
-      {
-        id: 4,
-        title: "循環的夜",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/theRecurringNight.m4a",
-      },
-      {
-        id: 5,
-        title: "我不適合聚會",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/partyMisfit.m4a",
-      },
+      { id: 1, title: "德州之戀", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/texasLove.m4a" },
+      { id: 2, title: "嘔吐", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/puke.m4a" },
+      { id: 3, title: "某夜後台", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/thatNightBackstage.m4a" },
+      { id: 4, title: "循環的夜", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/theRecurringNight.m4a" },
+      { id: 5, title: "我不適合聚會", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/partyMisfit.m4a" },
     ],
   },
 };
+
+type PlayMode = "sequence" | "loopOne" | "shuffle";
 
 function fmt(s: number): string {
   if (!s || isNaN(s) || !isFinite(s)) return "0:00";
@@ -111,7 +50,6 @@ function fmt(s: number): string {
   return mins + ":" + String(secs).padStart(2, "0");
 }
 
-// 内部逻辑组件
 function PlayerContent() {
   const searchParams = useSearchParams();
   const [activeId, setActiveId] = useState<string>("tizzy-bac");
@@ -122,18 +60,18 @@ function PlayerContent() {
   const [dur, setDur] = useState<number>(0);
   const [liked, setLiked] = useState<boolean>(false);
   const [queue, setQueue] = useState<boolean>(false);
+  
+  // 新增：播放模式状态
+  const [playMode, setPlayMode] = useState<PlayMode>("sequence");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isDragging = useRef<boolean>(false);
 
-  // --- URL识别与清洗 ---
   useEffect(() => {
     const idFromUrl = searchParams.get("id");
     if (idFromUrl && LIBRARIES[idFromUrl]) {
       setActiveId(idFromUrl);
     }
-
-    // 清理 URL 参数 (洗白)
     if (idFromUrl && typeof window !== "undefined") {
       const timer = setTimeout(() => {
         window.history.replaceState({}, "", "/my-mla-player/");
@@ -158,47 +96,35 @@ function PlayerContent() {
 
   const safeDur = dur > 0 ? dur : 100;
   const pct = (cur / safeDur) * 100;
-  // --- 新增：同步媒体信息到系统控制中心 ---
+
   useEffect(() => {
     if ("mediaSession" in navigator) {
       const track = tracks[idx];
       const config = LIBRARIES[activeId];
-
-      // 1. 设置元数据：控制息屏显示的歌名、歌手、封面
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title,
         artist: track.artist,
         album: track.album || "Unknown Album",
-        artwork: [
-          {
-            src: config.cover,
-            sizes: "512x512",
-            type: "image/jpg",
-          },
-        ],
+        artwork: [{ src: config.cover, sizes: "512x512", type: "image/jpg" }],
       });
-
-      // 2. 注册系统控制按钮的回调
       navigator.mediaSession.setActionHandler("play", () => setPlaying(true));
       navigator.mediaSession.setActionHandler("pause", () => setPlaying(false));
       navigator.mediaSession.setActionHandler("previoustrack", () => prev());
       navigator.mediaSession.setActionHandler("nexttrack", () => next());
-
-      // 可选：支持进度条拖动同步
       navigator.mediaSession.setActionHandler("seekto", (details) => {
         if (audioRef.current && details.seekTime !== undefined) {
           audioRef.current.currentTime = details.seekTime;
         }
       });
     }
-  }, [idx, activeId]); // 监听切歌和切库
+  }, [idx, activeId]);
 
-  // --- 新增：同步播放状态（播放/暂停） ---
   useEffect(() => {
     if ("mediaSession" in navigator) {
       navigator.mediaSession.playbackState = playing ? "playing" : "paused";
     }
   }, [playing]);
+
   const onTimeUpdate = () => {
     if (audioRef.current && !isDragging.current) {
       setCur(audioRef.current.currentTime);
@@ -211,17 +137,11 @@ function PlayerContent() {
     }
   };
 
-  const handleSeekStart = () => {
-    isDragging.current = true;
-  };
-  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCur(parseFloat(e.target.value));
-  };
+  const handleSeekStart = () => { isDragging.current = true; };
+  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => { setCur(parseFloat(e.target.value)); };
   const handleSeekEnd = () => {
     if (audioRef.current) audioRef.current.currentTime = cur;
-    setTimeout(() => {
-      isDragging.current = false;
-    }, 50);
+    setTimeout(() => { isDragging.current = false; }, 50);
   };
 
   function goTo(i: number): void {
@@ -233,20 +153,43 @@ function PlayerContent() {
   }
 
   const prev = (): void => goTo((idx - 1 + tracks.length) % tracks.length);
-  const next = (): void => goTo((idx + 1) % tracks.length);
+  
+  // 修改：下一首逻辑（支持随机播放）
+  const next = (): void => {
+    if (playMode === "shuffle") {
+      const nextIdx = Math.floor(Math.random() * tracks.length);
+      // 避免随机到当前同一首歌（如果曲库多于1首）
+      if (nextIdx === idx && tracks.length > 1) {
+        next();
+      } else {
+        goTo(nextIdx);
+      }
+    } else {
+      goTo((idx + 1) % tracks.length);
+    }
+  };
+
+  // 修改：播放结束处理（支持单曲循环）
+  const handleEnded = () => {
+    if (playMode === "loopOne") {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
+      }
+    } else {
+      next();
+    }
+  };
+
+  // 新增：切换播放模式
+  const togglePlayMode = () => {
+    const modes: PlayMode[] = ["sequence", "loopOne", "shuffle"];
+    const nextMode = modes[(modes.indexOf(playMode) + 1) % 3];
+    setPlayMode(nextMode);
+  };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-        background: config.theme,
-        fontFamily: "'DM Sans',sans-serif",
-      }}
-    >
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 16, background: config.theme, fontFamily: "'DM Sans',sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=DM+Sans:wght@400;500&display=swap');
         .vinyl { animation:spin 3s linear infinite; animation-play-state:paused; }
@@ -268,389 +211,101 @@ function PlayerContent() {
         src={track.src}
         onTimeUpdate={onTimeUpdate}
         onLoadedMetadata={onLoadedMetadata}
-        onEnded={next}
+        onEnded={handleEnded}
         preload="metadata"
       />
 
-      <div style={{ position: "relative", width: "100%" }}>
-        {/* QUEUE */}
+      <div style={{ position: "relative", width: "100%", maxWidth: 400 }}>
         {queue && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 20,
-              borderRadius: 28,
-              background: "rgba(10,5,2,.98)",
-              border: "1px solid rgba(245,166,35,.15)",
-              padding: 24,
-              animation: "qslide .25s ease",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "'Playfair Display',serif",
-                  color: "#f5a623",
-                  fontSize: 20,
-                  fontWeight: 900,
-                }}
-              >
-                Queue
-              </span>
-              <button
-                onClick={() => setQueue(false)}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  border: "none",
-                  background: "rgba(255,255,255,.1)",
-                  color: "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                ✕
-              </button>
+          <div style={{ position: "absolute", inset: 0, zIndex: 20, borderRadius: 28, background: "rgba(10,5,2,.98)", border: "1px solid rgba(245,166,35,.15)", padding: 24, animation: "qslide .25s ease" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <span style={{ fontFamily: "'Playfair Display',serif", color: "#f5a623", fontSize: 20, fontWeight: 900 }}>Queue</span>
+              <button onClick={() => setQueue(false)} style={{ width: 32, height: 32, borderRadius: "50%", border: "none", background: "rgba(255,255,255,.1)", color: "#fff", cursor: "pointer" }}>✕</button>
             </div>
             {tracks.map((t: any, i: number) => (
-              <button
-                key={t.id}
-                onClick={() => goTo(i)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  width: "100%",
-                  padding: 10,
-                  borderRadius: 14,
-                  marginBottom: 8,
-                  cursor: "pointer",
-                  border: "none",
-                  background:
-                    i === idx
-                      ? "rgba(245,166,35,.12)"
-                      : "rgba(255,255,255,.04)",
-                }}
-              >
-                <img
-                  src={config.cover}
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 10,
-                    objectFit: "cover",
-                  }}
-                />
+              <button key={t.id} onClick={() => goTo(i)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: 10, borderRadius: 14, marginBottom: 8, cursor: "pointer", border: "none", background: i === idx ? "rgba(245,166,35,.12)" : "rgba(255,255,255,.04)" }}>
+                <img src={config.cover} style={{ width: 42, height: 42, borderRadius: 10, objectFit: "cover" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 14,
-                      color: i === idx ? "#f5a623" : "#fff",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {t.title}
-                  </div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)" }}>
-                    {t.artist}
-                  </div>
+                  <div style={{ fontSize: 14, color: i === idx ? "#f5a623" : "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,.4)" }}>{t.artist}</div>
                 </div>
               </button>
             ))}
           </div>
         )}
 
-        {/* CARD */}
-        <div
-          style={{
-            borderRadius: 28,
-            overflow: "hidden",
-            background: "linear-gradient(160deg,#2c1708,#1a0c05 55%,#230f06)",
-            border: "1px solid rgba(245,166,35,.1)",
-            boxShadow: "0 48px 96px rgba(0,0,0,.65)",
-          }}
-        >
+        <div style={{ borderRadius: 28, overflow: "hidden", background: "linear-gradient(160deg,#2c1708,#1a0c05 55%,#230f06)", border: "1px solid rgba(245,166,35,.1)", boxShadow: "0 48px 96px rgba(0,0,0,.65)" }}>
           <div style={{ position: "relative", aspectRatio: "1/1" }}>
-            <img
-              src={config.cover}
-              key={activeId + idx}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                animation: "fadeup .4s ease",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(to bottom,transparent 45%,rgba(14,6,2,.98))",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: 52,
-                background: "rgba(0,0,0,.65)",
-                padding: "5px 0",
-                borderTop: "1px solid rgba(245,166,35,.3)",
-                borderBottom: "1px solid rgba(245,166,35,.3)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  display: "inline-block",
-                  whiteSpace: "nowrap",
-                  animation: "marquee 14s linear infinite",
-                  color: "#f5a623",
-                  fontSize: 10,
-                  letterSpacing: "0.2em",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                }}
-              >
-                NOW PLAYING · {track.title} · {track.artist} &nbsp;&nbsp;&nbsp;
-                NOW PLAYING · {track.title} · {track.artist} &nbsp;&nbsp;&nbsp;
+            <img src={config.cover} key={activeId + idx} style={{ width: "100%", height: "100%", objectFit: "cover", animation: "fadeup .4s ease" }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom,transparent 45%,rgba(14,6,2,.98))" }} />
+            <div style={{ position: "absolute", left: 0, right: 0, bottom: 52, background: "rgba(0,0,0,.65)", padding: "5px 0", borderTop: "1px solid rgba(245,166,35,.3)", borderBottom: "1px solid rgba(245,166,35,.3)", overflow: "hidden" }}>
+              <div style={{ display: "inline-block", whiteSpace: "nowrap", animation: "marquee 14s linear infinite", color: "#f5a623", fontSize: 10, letterSpacing: "0.2em", fontWeight: 600, textTransform: "uppercase" }}>
+                NOW PLAYING · {track.title} · {track.artist} &nbsp;&nbsp;&nbsp; NOW PLAYING · {track.title} · {track.artist} &nbsp;&nbsp;&nbsp;
               </div>
             </div>
             <div style={{ position: "absolute", bottom: -18, right: 20 }}>
-              <div
-                className={"vinyl" + (playing ? " on" : "")}
-                style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: "50%",
-                  background:
-                    "radial-gradient(circle,#1a0e06 18%,#2e1a0e 20%,#1a0e06 52%)",
-                  border: "2px solid rgba(245,166,35,.28)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: "50%",
-                    background: "#f5a623",
-                  }}
-                />
+              <div className={"vinyl" + (playing ? " on" : "")} style={{ width: 60, height: 60, borderRadius: "50%", background: "radial-gradient(circle,#1a0e06 18%,#2e1a0e 20%,#1a0e06 52%)", border: "2px solid rgba(245,166,35,.28)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#f5a623" }} />
               </div>
             </div>
           </div>
 
           <div style={{ padding: "30px 24px 24px" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 4,
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <h2
-                  key={track.title}
-                  style={{
-                    fontFamily: "'Playfair Display',serif",
-                    fontSize: 26,
-                    fontWeight: 900,
-                    color: "#fff",
-                    animation: "fadeup .4s ease",
-                  }}
-                >
-                  {track.title}
-                </h2>
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: "rgba(255,255,255,.42)",
-                    marginTop: 6,
-                  }}
-                >
-                  {track.artist}
-                </p>
+                <h2 key={track.title} style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, fontWeight: 900, color: "#fff", animation: "fadeup .4s ease" }}>{track.title}</h2>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,.42)", marginTop: 6 }}>{track.artist}</p>
               </div>
-              <button
-                onClick={() => setLiked(!liked)}
-                className="btn-ctrl"
-                style={{
-                  width: 36,
-                  height: 36,
-                  background: liked
-                    ? "rgba(245,166,35,.2)"
-                    : "rgba(255,255,255,.07)",
-                  color: liked ? "#f5a623" : "rgba(255,255,255,.35)",
-                }}
-              >
+              <button onClick={() => setLiked(!liked)} className="btn-ctrl" style={{ width: 36, height: 36, background: liked ? "rgba(245,166,35,.2)" : "rgba(255,255,255,.07)", color: liked ? "#f5a623" : "rgba(255,255,255,.35)" }}>
                 <Heart size={18} fill={liked ? "#f5a623" : "transparent"} />
               </button>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-end",
-                gap: 2,
-                height: 32,
-                margin: "14px 0",
-              }}
-            >
-              {Array.from(
-                { length: 22 },
-                (_, i) => 5 + Math.abs(Math.sin(i * 0.75)) * 22,
-              ).map((h, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: 3,
-                    height: h,
-                    borderRadius: 4,
-                    background:
-                      (i / 22) * 100 < pct ? "#f5a623" : "rgba(255,255,255,.2)",
-                    animation: playing
-                      ? `wavebar ${0.5 + Math.abs(Math.sin(h)) * 0.5}s ease-in-out ${i * 0.04}s infinite alternate`
-                      : "none",
-                  }}
-                />
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 32, margin: "14px 0" }}>
+              {Array.from({ length: 22 }, (_, i) => 5 + Math.abs(Math.sin(i * 0.75)) * 22).map((h, i) => (
+                <div key={i} style={{ width: 3, height: h, borderRadius: 4, background: (i / 22) * 100 < pct ? "#f5a623" : "rgba(255,255,255,.2)", animation: playing ? `wavebar ${0.5 + Math.abs(Math.sin(h)) * 0.5}s ease-in-out ${i * 0.04}s infinite alternate` : "none" }} />
               ))}
             </div>
 
-            <div
-              style={{
-                position: "relative",
-                height: 20,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  height: 3,
-                  borderRadius: 4,
-                  background: "rgba(255,255,255,.12)",
-                }}
-              >
-                <div
-                  style={{
-                    height: "100%",
-                    width: pct + "%",
-                    background: "linear-gradient(90deg,#c8440a,#f5a623)",
-                    borderRadius: 4,
-                  }}
-                />
+            <div style={{ position: "relative", height: 20, display: "flex", alignItems: "center" }}>
+              <div style={{ position: "absolute", left: 0, right: 0, height: 3, borderRadius: 4, background: "rgba(255,255,255,.12)" }}>
+                <div style={{ height: "100%", width: pct + "%", background: "linear-gradient(90deg,#c8440a,#f5a623)", borderRadius: 4 }} />
               </div>
-              <input
-                type="range"
-                className="seek"
-                min={0}
-                max={safeDur}
-                step={0.1}
-                value={cur}
-                onPointerDown={handleSeekStart}
-                onChange={handleSeekChange}
-                onPointerUp={handleSeekEnd}
-              />
+              <input type="range" className="seek" min={0} max={safeDur} step={0.1} value={cur} onPointerDown={handleSeekStart} onChange={handleSeekChange} onPointerUp={handleSeekEnd} />
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: 11,
-                color: "rgba(255,255,255,.32)",
-                marginTop: 4,
-              }}
-            >
-              <span>{fmt(cur)}</span>
-              <span>-{fmt(Math.max(0, dur - cur))}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "rgba(255,255,255,.32)", marginTop: 4 }}>
+              <span>{fmt(cur)}</span><span>-{fmt(Math.max(0, dur - cur))}</span>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginTop: 20,
-              }}
-            >
-              <button
-                onClick={() => setQueue(true)}
-                className="btn-ctrl"
-                style={{
-                  width: 38,
-                  height: 38,
-                  background: "rgba(255,255,255,.07)",
-                  color: "#fff",
-                }}
-              >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
+              <button onClick={() => setQueue(true)} className="btn-ctrl" style={{ width: 38, height: 38, background: "rgba(255,255,255,.07)", color: "#fff" }}>
                 <ListMusic size={18} />
               </button>
-              <button
-                onClick={prev}
-                className="btn-ctrl"
-                style={{
-                  width: 44,
-                  height: 44,
-                  background: "rgba(255,255,255,.08)",
-                  color: "#fff",
-                }}
-              >
+              <button onClick={prev} className="btn-ctrl" style={{ width: 44, height: 44, background: "rgba(255,255,255,.08)", color: "#fff" }}>
                 <SkipBack size={22} />
               </button>
-              <button
-                onClick={() => setPlaying(!playing)}
-                className="btn-ctrl"
-                style={{
-                  width: 64,
-                  height: 64,
-                  background: "linear-gradient(135deg,#d85510,#f5a623)",
-                  color: "#fff",
-                  boxShadow: "0 8px 28px rgba(220,80,16,.5)",
-                }}
-              >
+              <button onClick={() => setPlaying(!playing)} className="btn-ctrl" style={{ width: 64, height: 64, background: "linear-gradient(135deg,#d85510,#f5a623)", color: "#fff", boxShadow: "0 8px 28px rgba(220,80,16,.5)" }}>
                 {playing ? <Pause size={28} /> : <Play size={28} />}
               </button>
-              <button
-                onClick={next}
-                className="btn-ctrl"
-                style={{
-                  width: 44,
-                  height: 44,
-                  background: "rgba(255,255,255,.08)",
-                  color: "#fff",
-                }}
-              >
+              <button onClick={next} className="btn-ctrl" style={{ width: 44, height: 44, background: "rgba(255,255,255,.08)", color: "#fff" }}>
                 <SkipForward size={22} />
               </button>
-              <button
-                className="btn-ctrl"
-                style={{
-                  width: 38,
-                  height: 38,
-                  background: "rgba(255,255,255,.07)",
-                  color: "#fff",
+              
+              {/* 修改后的播放模式切换按钮 */}
+              <button 
+                onClick={togglePlayMode} 
+                className="btn-ctrl" 
+                style={{ 
+                  width: 38, 
+                  height: 38, 
+                  background: playMode !== "sequence" ? "rgba(245,166,35,.15)" : "rgba(255,255,255,.07)", 
+                  color: playMode !== "sequence" ? "#f5a623" : "#fff" 
                 }}
               >
-                <Repeat size={18} />
+                {playMode === "sequence" && <Repeat size={18} />}
+                {playMode === "loopOne" && <Repeat1 size={18} />}
+                {playMode === "shuffle" && <Shuffle size={18} />}
               </button>
             </div>
           </div>
@@ -660,14 +315,10 @@ function PlayerContent() {
   );
 }
 
-// 根入口，处理静态导出兼容性
 export default function MusicPlayer() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
   if (!mounted) return null;
-
   return (
     <Suspense fallback={null}>
       <PlayerContent />
