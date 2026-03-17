@@ -8,7 +8,7 @@ import {
   Repeat1,
   Shuffle,
   SkipBack,
-  SkipForward,
+  SkipForward
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -18,94 +18,29 @@ const LIBRARIES: Record<string, any> = {
   "tizzy-bac": {
     cover: "/my-mla-player/images/Tell_Tale_Heart.jpg",
     tracks: [
-      {
-        id: 1,
-        title: "開放性骨折",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/bone.m4a",
-      },
-      {
-        id: 2,
-        title: "保險推銷員之死",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/deathOfASalesman.m4a",
-      },
-      {
-        id: 3,
-        title: "末日鋼琴手",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/doomsdayPianist.m4a",
-      },
-      {
-        id: 4,
-        title: "崇高與滑稽",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/sublimeAndComic.m4a",
-      },
-      {
-        id: 5,
-        title: "周日午後婦女的時間",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/womenTime.m4a",
-      },
-      {
-        id: 6,
-        title: "忘記丟掉",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/forgetThrow.m4a",
-      },
-      {
-        id: 7,
-        title: "Every Dogs has it's lawn",
-        artist: "Tizzy Bac",
-        src: "/my-mla-player/audio/dogsLawn.m4a",
-      },
+      { id: 1, title: "開放性骨折", artist: "Tizzy Bac", src: "/my-mla-player/audio/bone.m4a" },
+      { id: 2, title: "保險推銷員之死", artist: "Tizzy Bac", src: "/my-mla-player/audio/deathOfASalesman.m4a" },
+      { id: 3, title: "末日鋼琴手", artist: "Tizzy Bac", src: "/my-mla-player/audio/doomsdayPianist.m4a" },
+      { id: 4, title: "崇高與滑稽", artist: "Tizzy Bac", src: "/my-mla-player/audio/sublimeAndComic.m4a" },
+      { id: 5, title: "周日午後婦女的時間", artist: "Tizzy Bac", src: "/my-mla-player/audio/womenTime.m4a" },
+      { id: 6, title: "忘記丟掉", artist: "Tizzy Bac", src: "/my-mla-player/audio/forgetThrow.m4a" },
+      { id: 7, title: "Every Dogs has it's lawn", artist: "Tizzy Bac", src: "/my-mla-player/audio/dogsLawn.m4a" },
     ],
   },
   mla: {
     cover: "/my-mla-player/images/Joking_With_You.jpg",
     tracks: [
-      {
-        id: 1,
-        title: "德州之戀",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/texasLove.m4a",
-      },
-      {
-        id: 2,
-        title: "嘔吐",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/puke.m4a",
-      },
-      {
-        id: 3,
-        title: "某夜後台",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/thatNightBackstage.m4a",
-      },
-      {
-        id: 4,
-        title: "循環的夜",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/theRecurringNight.m4a",
-      },
-      {
-        id: 5,
-        title: "我不適合聚會",
-        artist: "My Little Airport",
-        album: "跟你開玩笑",
-        src: "/my-mla-player/audio/partyMisfit.m4a",
-      },
+      { id: 1, title: "德州之戀", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/texasLove.m4a" },
+      { id: 2, title: "嘔吐", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/puke.m4a" },
+      { id: 3, title: "某夜後台", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/thatNightBackstage.m4a" },
+      { id: 4, title: "循環的夜", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/theRecurringNight.m4a" },
+      { id: 5, title: "我不適合聚會", artist: "My Little Airport", album: "跟你開玩笑", src: "/my-mla-player/audio/partyMisfit.m4a" },
     ],
   },
 };
 
 type PlayMode = "sequence" | "loopOne" | "shuffle";
-const VISUALIZER_BARS = 40;
+const VISUALIZER_BARS = 40; 
 
 function fmt(s: number): string {
   if (!s || isNaN(s) || !isFinite(s)) return "0:00";
@@ -124,9 +59,7 @@ function PlayerContent() {
   const [liked, setLiked] = useState<boolean>(false);
   const [queue, setQueue] = useState<boolean>(false);
   const [playMode, setPlayMode] = useState<PlayMode>("sequence");
-  const [vData, setVData] = useState<number[]>(
-    new Array(VISUALIZER_BARS).fill(4),
-  );
+  const [vData, setVData] = useState<number[]>(new Array(VISUALIZER_BARS).fill(4));
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
@@ -139,45 +72,67 @@ function PlayerContent() {
   const tracks = config.tracks;
   const track = tracks[idx] || tracks[0];
 
-  // --- 1. URL 初始化与清洗逻辑 ---
+  // --- 1. URL 初始化与清洗 ---
   useEffect(() => {
     const idFromUrl = searchParams.get("id");
     if (idFromUrl && LIBRARIES[idFromUrl]) {
       setActiveId(idFromUrl);
-      // 清洗逻辑：0.8秒后抹除 URL 参数，保持地址栏干净
       if (typeof window !== "undefined") {
         setTimeout(() => {
-          const cleanUrl =
-            window.location.protocol +
-            "//" +
-            window.location.host +
-            window.location.pathname;
+          const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
           window.history.replaceState({ path: cleanUrl }, "", cleanUrl);
         }, 800);
       }
     }
   }, [searchParams]);
 
-  // --- 2. 频谱分析初始化 ---
+  // --- 2. 核心修改：处理后台锁屏逻辑 ---
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // 页面隐藏（锁屏）时，挂起 AudioContext 以释放对音频通道的强制占用
+        if (ctxRef.current && ctxRef.current.state === "running") {
+          ctxRef.current.suspend();
+        }
+      } else {
+        // 页面回到前台，恢复 AudioContext
+        if (ctxRef.current && ctxRef.current.state === "suspended" && playing) {
+          ctxRef.current.resume();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [playing]);
+
+  // --- 3. 频谱分析初始化 (改进版：采用并行连接) ---
   const initAudioContext = () => {
     if (ctxRef.current || !audioRef.current) return;
-    const AudioContextClass =
-      window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     const ctx = new AudioContextClass();
     const analyzer = ctx.createAnalyser();
     const source = ctx.createMediaElementSource(audioRef.current);
+    
     analyzer.fftSize = 128;
+    
+    // 【关键修改】并行连接：
+    // 1. source -> analyzer (用于绘图)
+    // 2. source -> destination (原始音频直连输出，不被分析器阻塞)
     source.connect(analyzer);
-    analyzer.connect(ctx.destination);
+    source.connect(ctx.destination); 
+    // 注意：不再调用 analyzer.connect(ctx.destination)，防止双重输出或锁屏截断
+
     ctxRef.current = ctx;
     analyzerRef.current = analyzer;
     sourceRef.current = source;
   };
 
-  // --- 3. 频谱动画循环 ---
+  // --- 4. 频谱动画 ---
   useEffect(() => {
     const updateVisualizer = () => {
-      if (playing && analyzerRef.current) {
+      // 只有在页面可见且正在播放时才计算频谱
+      if (playing && analyzerRef.current && !document.hidden) {
         const dataArray = new Uint8Array(analyzerRef.current.frequencyBinCount);
         analyzerRef.current.getByteFrequencyData(dataArray);
         const step = Math.floor(dataArray.length / (VISUALIZER_BARS * 1.2));
@@ -186,18 +141,16 @@ function PlayerContent() {
           return 4 + (dataArray[i * step] / 255) * 28 * decay;
         });
         setVData(bars);
-      } else if (!playing) {
-        setVData((prev) => prev.map((v) => Math.max(4, v * 0.92)));
+      } else if (!playing || document.hidden) {
+        setVData(prev => prev.map(v => Math.max(4, v * 0.92)));
       }
       animationRef.current = requestAnimationFrame(updateVisualizer);
     };
     animationRef.current = requestAnimationFrame(updateVisualizer);
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    };
+    return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
   }, [playing]);
 
-  // --- 4. 播放控制 ---
+  // --- 5. 播放控制 ---
   const togglePlay = async () => {
     if (!audioRef.current) return;
     if (!ctxRef.current) initAudioContext();
@@ -210,9 +163,7 @@ function PlayerContent() {
       try {
         await audioRef.current.play();
         setPlaying(true);
-      } catch (err) {
-        console.error(err);
-      }
+      } catch (err) { console.error(err); }
     }
   };
 
@@ -221,7 +172,7 @@ function PlayerContent() {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.title,
         artist: track.artist,
-        artwork: [{ src: config.cover, sizes: "512x512", type: "image/jpg" }],
+        artwork: [{ src: config.cover, sizes: "512x512", type: "image/jpg" }]
       });
       navigator.mediaSession.setActionHandler("play", togglePlay);
       navigator.mediaSession.setActionHandler("pause", togglePlay);
@@ -243,10 +194,7 @@ function PlayerContent() {
 
   const prev = () => goTo((idx - 1 + tracks.length) % tracks.length);
   const next = () => {
-    const nextIdx =
-      playMode === "shuffle"
-        ? Math.floor(Math.random() * tracks.length)
-        : (idx + 1) % tracks.length;
+    const nextIdx = playMode === "shuffle" ? Math.floor(Math.random() * tracks.length) : (idx + 1) % tracks.length;
     goTo(nextIdx);
   };
 
@@ -254,41 +202,22 @@ function PlayerContent() {
     if (playMode === "loopOne" && audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play();
-    } else {
-      next();
-    }
+    } else { next(); }
   };
 
   const pct = (cur / (dur || 100)) * 100;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-        overflow: "hidden",
-        position: "relative",
-        fontFamily: "'DM Sans',sans-serif",
-        background: "#000",
-      }}
-    >
-      {/* 动态毛玻璃背景 */}
-      <div
-        style={{
-          position: "absolute",
-          inset: -20,
-          zIndex: 0,
-          backgroundImage: `url(${config.cover})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "blur(60px) brightness(0.3)",
-          transform: "scale(1.1)",
-          transition: "background-image 0.8s ease",
-        }}
-      />
+    <div style={{ 
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", 
+      padding: 16, overflow: "hidden", position: "relative", fontFamily: "'DM Sans',sans-serif",
+      background: "#000"
+    }}>
+      <div style={{
+        position: "absolute", inset: -20, zIndex: 0,
+        backgroundImage: `url(${config.cover})`, backgroundSize: "cover", backgroundPosition: "center",
+        filter: "blur(60px) brightness(0.3)", transform: "scale(1.1)", transition: "background-image 0.8s ease"
+      }} />
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=DM+Sans:wght@400;500&display=swap');
@@ -304,125 +233,32 @@ function PlayerContent() {
         .btn-ctrl:active { transform:scale(.94); }
       `}</style>
 
-      {/* <audio
-        ref={audioRef}
-        src={track.src}
+      <audio 
+        ref={audioRef} 
+        src={track.src} 
         crossOrigin="anonymous"
-        onTimeUpdate={() =>
-          !isDragging.current && setCur(audioRef.current?.currentTime || 0)
-        }
-        onLoadedMetadata={() => setDur(audioRef.current?.duration || 0)}
-        onEnded={handleEnded}
-        preload="auto"
-      /> */}
-      <audio
-        ref={audioRef}
-        src={track.src}
-        crossOrigin="anonymous"
-        playsInline // 必须添加：防止在 iOS 上自动全屏或锁屏停止
-        webkit-playsinline="true" // 兼容旧版 Safari
-        onTimeUpdate={() =>
-          !isDragging.current && setCur(audioRef.current?.currentTime || 0)
-        }
-        onLoadedMetadata={() => setDur(audioRef.current?.duration || 0)}
-        onEnded={handleEnded}
-        preload="auto"
+        playsInline // 必须：允许 iOS 在线播放
+        webkit-playsinline="true"
+        onTimeUpdate={() => !isDragging.current && setCur(audioRef.current?.currentTime || 0)} 
+        onLoadedMetadata={() => setDur(audioRef.current?.duration || 0)} 
+        onEnded={handleEnded} 
+        preload="auto" 
       />
 
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          maxWidth: 400,
-          zIndex: 10,
-        }}
-      >
+      <div style={{ position: "relative", width: "100%", maxWidth: 400, zIndex: 10 }}>
         {queue && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 20,
-              borderRadius: 28,
-              background: "rgba(10,5,2,.98)",
-              padding: 24,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: 20,
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "'Playfair Display',serif",
-                  color: "#f5a623",
-                  fontSize: 20,
-                  fontWeight: 900,
-                }}
-              >
-                Queue
-              </span>
-              <button
-                onClick={() => setQueue(false)}
-                style={{
-                  border: "none",
-                  background: "none",
-                  color: "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                ✕
-              </button>
+          <div style={{ position: "absolute", inset: 0, zIndex: 20, borderRadius: 28, background: "rgba(10,5,2,.98)", padding: 24 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+              <span style={{ fontFamily: "'Playfair Display',serif", color: "#f5a623", fontSize: 20, fontWeight: 900 }}>Queue</span>
+              <button onClick={() => setQueue(false)} style={{ border: "none", background: "none", color: "#fff", cursor: "pointer" }}>✕</button>
             </div>
             <div style={{ maxHeight: "80%", overflowY: "auto" }}>
               {tracks.map((t: any, i: number) => (
-                <button
-                  key={t.id}
-                  onClick={() => goTo(i)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    width: "100%",
-                    padding: 10,
-                    borderRadius: 14,
-                    marginBottom: 8,
-                    border: "none",
-                    background:
-                      i === idx ? "rgba(245,166,35,.15)" : "transparent",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <img
-                    src={config.cover}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 8,
-                      objectFit: "cover",
-                    }}
-                  />
+                <button key={t.id} onClick={() => goTo(i)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: 10, borderRadius: 14, marginBottom: 8, border: "none", background: i === idx ? "rgba(245,166,35,.15)" : "transparent", cursor: "pointer", textAlign: "left" }}>
+                  <img src={config.cover} style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover" }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 14,
-                        color: i === idx ? "#f5a623" : "#fff",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {t.title}
-                    </div>
-                    <div
-                      style={{ fontSize: 11, color: "rgba(255,255,255,.4)" }}
-                    >
-                      {t.artist}
-                    </div>
+                    <div style={{ fontSize: 14, color: i === idx ? "#f5a623" : "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t.title}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)" }}>{t.artist}</div>
                   </div>
                 </button>
               ))}
@@ -430,273 +266,64 @@ function PlayerContent() {
           </div>
         )}
 
-        <div
-          style={{
-            borderRadius: 28,
-            overflow: "hidden",
-            background: "rgba(26,12,5,0.85)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(245,166,35,.1)",
-            boxShadow: "0 40px 80px rgba(0,0,0,.6)",
-          }}
-        >
+        <div style={{ borderRadius: 28, overflow: "hidden", background: "rgba(26,12,5,0.85)", backdropFilter: "blur(10px)", border: "1px solid rgba(245,166,35,.1)", boxShadow: "0 40px 80px rgba(0,0,0,.6)" }}>
           <div style={{ position: "relative", aspectRatio: "1/1" }}>
-            <img
-              src={config.cover}
-              key={activeId + idx}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                animation: "fadeup .5s ease",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(to bottom,transparent 50%,rgba(14,6,2,0.95))",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: 52,
-                background: "rgba(0,0,0,.6)",
-                padding: "6px 0",
-                borderTop: "1px solid rgba(245,166,35,0.2)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  display: "inline-block",
-                  whiteSpace: "nowrap",
-                  animation: "marquee 15s linear infinite",
-                  color: "#f5a623",
-                  fontSize: 10,
-                  letterSpacing: "0.15em",
-                }}
-              >
-                LISTENING TO · {track.title} · {track.artist} &nbsp;&nbsp;&nbsp;
-                LISTENING TO · {track.title} · {track.artist} &nbsp;&nbsp;&nbsp;
+            <img src={config.cover} key={activeId + idx} style={{ width: "100%", height: "100%", objectFit: "cover", animation: "fadeup .5s ease" }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom,transparent 50%,rgba(14,6,2,0.95))" }} />
+            <div style={{ position: "absolute", left: 0, right: 0, bottom: 52, background: "rgba(0,0,0,.6)", padding: "6px 0", borderTop: "1px solid rgba(245,166,35,0.2)", overflow: "hidden" }}>
+              <div style={{ display: "inline-block", whiteSpace: "nowrap", animation: "marquee 15s linear infinite", color: "#f5a623", fontSize: 10, letterSpacing: "0.15em" }}>
+                LISTENING TO · {track.title} · {track.artist} &nbsp;&nbsp;&nbsp; LISTENING TO · {track.title} · {track.artist} &nbsp;&nbsp;&nbsp;
               </div>
             </div>
             <div style={{ position: "absolute", bottom: -18, right: 24 }}>
-              <div
-                className={"vinyl" + (playing ? " on" : "")}
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: "50%",
-                  background:
-                    "radial-gradient(circle,#1a0e06 18%,#331a0a 20%,#1a0e06 52%)",
-                  border: "2px solid rgba(245,166,35,.3)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: "50%",
-                    background: "#f5a623",
-                  }}
-                />
+              <div className={"vinyl" + (playing ? " on" : "")} style={{ width: 64, height: 64, borderRadius: "50%", background: "radial-gradient(circle,#1a0e06 18%,#331a0a 20%,#1a0e06 52%)", border: "2px solid rgba(245,166,35,.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 14, height: 14, borderRadius: "50%", background: "#f5a623" }} />
               </div>
             </div>
           </div>
 
           <div style={{ padding: "32px 24px 24px" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <h2
-                  key={track.title}
-                  style={{
-                    fontFamily: "'Playfair Display',serif",
-                    fontSize: 26,
-                    color: "#fff",
-                    animation: "fadeup .4s ease",
-                    margin: 0,
-                  }}
-                >
-                  {track.title}
-                </h2>
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: "rgba(255,255,255,.45)",
-                    marginTop: 6,
-                  }}
-                >
-                  {track.artist}
-                </p>
+                <h2 key={track.title} style={{ fontFamily: "'Playfair Display',serif", fontSize: 26, color: "#fff", animation: "fadeup .4s ease", margin: 0 }}>{track.title}</h2>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,.45)", marginTop: 6 }}>{track.artist}</p>
               </div>
-              <button
-                onClick={() => setLiked(!liked)}
-                className="btn-ctrl"
-                style={{
-                  width: 38,
-                  height: 38,
-                  color: liked ? "#f5a623" : "rgba(255,255,255,0.3)",
-                }}
-              >
+              <button onClick={() => setLiked(!liked)} className="btn-ctrl" style={{ width: 38, height: 38, color: liked ? "#f5a623" : "rgba(255,255,255,0.3)" }}>
                 <Heart size={20} fill={liked ? "#f5a623" : "transparent"} />
               </button>
             </div>
 
-            {/* 密集细条频谱 */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-end",
-                gap: "1.5px",
-                height: 32,
-                margin: "20px 0",
-                padding: "0 2px",
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "flex-end", gap: "1.5px", height: 32, margin: "20px 0", padding: "0 2px" }}>
               {vData.map((h, i) => (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    maxWidth: "3.5px",
-                    height: h,
-                    borderRadius: "1px",
-                    background:
-                      (i / VISUALIZER_BARS) * 100 < pct
-                        ? "#f5a623"
-                        : "rgba(255,255,255,0.12)",
-                    transition: "height 0.08s ease",
-                  }}
-                />
+                <div key={i} style={{ flex: 1, maxWidth: "3.5px", height: h, borderRadius: "1px", background: (i / VISUALIZER_BARS) * 100 < pct ? "#f5a623" : "rgba(255,255,255,0.12)", transition: "height 0.08s ease" }} />
               ))}
             </div>
 
-            <div
-              style={{
-                position: "relative",
-                height: 20,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  height: 3,
-                  borderRadius: 4,
-                  background: "rgba(255,255,255,.1)",
-                }}
-              >
-                <div
-                  style={{
-                    height: "100%",
-                    width: pct + "%",
-                    background: "linear-gradient(90deg,#d85510,#f5a623)",
-                    borderRadius: 4,
-                  }}
-                />
+            <div style={{ position: "relative", height: 20, display: "flex", alignItems: "center" }}>
+              <div style={{ position: "absolute", left: 0, right: 0, height: 3, borderRadius: 4, background: "rgba(255,255,255,.1)" }}>
+                <div style={{ height: "100%", width: pct + "%", background: "linear-gradient(90deg,#d85510,#f5a623)", borderRadius: 4 }} />
               </div>
-              <input
-                type="range"
-                className="seek"
-                min={0}
-                max={dur || 100}
-                step={0.1}
-                value={cur}
-                onPointerDown={() => (isDragging.current = true)}
-                onChange={(e) => setCur(parseFloat(e.target.value))}
-                onPointerUp={() => {
-                  if (audioRef.current) audioRef.current.currentTime = cur;
-                  isDragging.current = false;
-                }}
+              <input type="range" className="seek" min={0} max={dur || 100} step={0.1} value={cur} 
+                onPointerDown={() => isDragging.current = true} 
+                onChange={(e) => setCur(parseFloat(e.target.value))} 
+                onPointerUp={() => { if(audioRef.current) audioRef.current.currentTime = cur; isDragging.current = false; }} 
               />
             </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: 11,
-                color: "rgba(255,255,255,.3)",
-                marginTop: 4,
-              }}
-            >
-              <span>{fmt(cur)}</span>
-              <span>-{fmt(Math.max(0, dur - cur))}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "rgba(255,255,255,.3)", marginTop: 4 }}>
+              <span>{fmt(cur)}</span><span>-{fmt(Math.max(0, dur - cur))}</span>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginTop: 24,
-              }}
-            >
-              <button
-                onClick={() => setQueue(true)}
-                className="btn-ctrl"
-                style={{ width: 40, height: 40 }}
-              >
-                <ListMusic size={20} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24 }}>
+              <button onClick={() => setQueue(true)} className="btn-ctrl" style={{ width: 40, height: 40 }}><ListMusic size={20} /></button>
+              <button onClick={prev} className="btn-ctrl" style={{ width: 48, height: 48 }}><SkipBack size={24} fill="currentColor" /></button>
+              <button onClick={togglePlay} className="btn-ctrl" style={{ width: 68, height: 68, background: "linear-gradient(135deg,#e85a12,#f5a623)", boxShadow: "0 10px 30px rgba(232,90,18,0.4)" }}>
+                {playing ? <Pause size={32} fill="white" /> : <Play size={32} style={{ marginLeft: 4 }} fill="white" />}
               </button>
-              <button
-                onClick={prev}
-                className="btn-ctrl"
-                style={{ width: 48, height: 48 }}
-              >
-                <SkipBack size={24} fill="currentColor" />
-              </button>
-              <button
-                onClick={togglePlay}
-                className="btn-ctrl"
-                style={{
-                  width: 68,
-                  height: 68,
-                  background: "linear-gradient(135deg,#e85a12,#f5a623)",
-                  boxShadow: "0 10px 30px rgba(232,90,18,0.4)",
-                }}
-              >
-                {playing ? (
-                  <Pause size={32} fill="white" />
-                ) : (
-                  <Play size={32} style={{ marginLeft: 4 }} fill="white" />
-                )}
-              </button>
-              <button
-                onClick={next}
-                className="btn-ctrl"
-                style={{ width: 48, height: 48 }}
-              >
-                <SkipForward size={24} fill="currentColor" />
-              </button>
-              <button
-                onClick={() => {
-                  const modes: PlayMode[] = ["sequence", "loopOne", "shuffle"];
-                  setPlayMode(modes[(modes.indexOf(playMode) + 1) % 3]);
-                }}
-                className="btn-ctrl"
-                style={{
-                  width: 40,
-                  height: 40,
-                  color: playMode !== "sequence" ? "#f5a623" : "#fff",
-                }}
-              >
+              <button onClick={next} className="btn-ctrl" style={{ width: 48, height: 48 }}><SkipForward size={24} fill="currentColor" /></button>
+              <button onClick={() => {
+                const modes: PlayMode[] = ["sequence", "loopOne", "shuffle"];
+                setPlayMode(modes[(modes.indexOf(playMode) + 1) % 3]);
+              }} className="btn-ctrl" style={{ width: 40, height: 40, color: playMode !== "sequence" ? "#f5a623" : "#fff" }}>
                 {playMode === "sequence" && <Repeat size={20} />}
                 {playMode === "loopOne" && <Repeat1 size={20} />}
                 {playMode === "shuffle" && <Shuffle size={20} />}
