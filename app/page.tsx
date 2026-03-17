@@ -29,7 +29,6 @@ const LIBRARIES: Record<string, any> = {
         artist: "Tizzy Bac",
         src: "/my-mla-player/audio/deathOfASalesman.m4a",
       },
-      
       {
         id: 3,
         title: "末日鋼琴手",
