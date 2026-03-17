@@ -13,7 +13,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
-// --- 1. 曲库配置 ---
+// --- 1. 曲库配置 (保持不变) ---
 const LIBRARIES: Record<string, any> = {
   "tizzy-bac": {
     cover: "/my-mla-player/images/Tell_Tale_Heart.jpg",
@@ -41,6 +41,9 @@ const LIBRARIES: Record<string, any> = {
 
 type PlayMode = "sequence" | "loopOne" | "shuffle";
 
+// --- 频谱柱子数量配置 (新增) ---
+const VISUALIZER_BARS = 40; // 增加到40根，使其更密集
+
 function fmt(s: number): string {
   if (!s || isNaN(s) || !isFinite(s)) return "0:00";
   const mins = Math.floor(s / 60);
@@ -58,7 +61,9 @@ function PlayerContent() {
   const [liked, setLiked] = useState<boolean>(false);
   const [queue, setQueue] = useState<boolean>(false);
   const [playMode, setPlayMode] = useState<PlayMode>("sequence");
-  const [vData, setVData] = useState<number[]>(new Array(22).fill(5));
+  
+  // 初始化时使用新的柱子数量
+  const [vData, setVData] = useState<number[]>(new Array(VISUALIZER_BARS).fill(4));
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
@@ -78,11 +83,11 @@ function PlayerContent() {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
     const ctx = new AudioContextClass();
     const analyzer = ctx.createAnalyser();
-    
-    // 必须确保存储 source 引用，防止被垃圾回收
     const source = ctx.createMediaElementSource(audioRef.current);
     
-    analyzer.fftSize = 64;
+    // fftSize 决定了频率分量的精细度，为了更密集的柱子，我们需要调大它
+    analyzer.fftSize = 128; // 增加到128，对应64个频率点
+    
     source.connect(analyzer);
     analyzer.connect(ctx.destination);
 
@@ -91,16 +96,24 @@ function PlayerContent() {
     sourceRef.current = source;
   };
 
-  // --- 2. 动画循环 ---
+  // --- 2. 动画循环 (核心逻辑修改) ---
   useEffect(() => {
     const updateVisualizer = () => {
       if (playing && analyzerRef.current) {
         const dataArray = new Uint8Array(analyzerRef.current.frequencyBinCount);
         analyzerRef.current.getByteFrequencyData(dataArray);
-        const bars = Array.from(dataArray.slice(0, 22)).map(v => 5 + (v / 255) * 25);
+        
+        // 映射逻辑：将更多的频率点映射到新的柱子数量
+        // 这里需要更精细的采样，不仅采样低频，还要覆盖一部分中高频
+        const step = Math.floor(dataArray.length / (VISUALIZER_BARS * 1.2)); // 只取频率范围的前80%
+        const bars = Array.from({ length: VISUALIZER_BARS }, (_, i) => {
+          // 增加频率衰减，中高频看起来更自然
+          const decay = 1 - (i / VISUALIZER_BARS) * 0.4;
+          return 4 + (dataArray[i * step] / 255) * 28 * decay;
+        });
         setVData(bars);
       } else if (!playing) {
-        setVData(prev => prev.map(v => Math.max(5, v * 0.9))); // 停下时缓缓下沉
+        setVData(prev => prev.map(v => Math.max(4, v * 0.92))); // 停下时下沉得更快一点
       }
       animationRef.current = requestAnimationFrame(updateVisualizer);
     };
@@ -110,18 +123,11 @@ function PlayerContent() {
     };
   }, [playing]);
 
-  // --- 3. 核心播放控制 (处理无声问题的关键) ---
+  // --- 3. 核心播放控制 (保持不变) ---
   const togglePlay = async () => {
     if (!audioRef.current) return;
-
-    // 第一次点击时初始化并解锁 Context
-    if (!ctxRef.current) {
-      initAudioContext();
-    }
-
-    if (ctxRef.current?.state === "suspended") {
-      await ctxRef.current.resume();
-    }
+    if (!ctxRef.current) initAudioContext();
+    if (ctxRef.current?.state === "suspended") await ctxRef.current.resume();
 
     if (playing) {
       audioRef.current.pause();
@@ -136,7 +142,7 @@ function PlayerContent() {
     }
   };
 
-  // --- 4. URL 与媒体控制 ---
+  // --- 4. URL 与媒体控制 (保持不变) ---
   useEffect(() => {
     const idFromUrl = searchParams.get("id");
     if (idFromUrl && LIBRARIES[idFromUrl]) setActiveId(idFromUrl);
@@ -160,7 +166,6 @@ function PlayerContent() {
     setIdx(i);
     setCur(0);
     setQueue(false);
-    // 切换歌曲后自动播放，需确保 Context 已恢复
     setTimeout(() => {
       if (ctxRef.current?.state === "suspended") ctxRef.current.resume();
       audioRef.current?.play();
@@ -193,7 +198,7 @@ function PlayerContent() {
       padding: 16, overflow: "hidden", position: "relative", fontFamily: "'DM Sans',sans-serif",
       background: "#000"
     }}>
-      {/* 动态毛玻璃背景 */}
+      {/* 动态毛玻璃背景 (保持不变) */}
       <div style={{
         position: "absolute", inset: -20, zIndex: 0,
         backgroundImage: `url(${config.cover})`, backgroundSize: "cover", backgroundPosition: "center",
@@ -225,7 +230,7 @@ function PlayerContent() {
       />
 
       <div style={{ position: "relative", width: "100%", maxWidth: 400, zIndex: 10 }}>
-        {/* 播放列表 */}
+        {/* 播放列表 (保持不变) */}
         {queue && (
           <div style={{ position: "absolute", inset: 0, zIndex: 20, borderRadius: 28, background: "rgba(10,5,2,.98)", padding: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
@@ -247,7 +252,7 @@ function PlayerContent() {
         )}
 
         <div style={{ borderRadius: 28, overflow: "hidden", background: "rgba(26,12,5,0.85)", backdropFilter: "blur(10px)", border: "1px solid rgba(245,166,35,.1)", boxShadow: "0 40px 80px rgba(0,0,0,.6)" }}>
-          {/* 封面区域 */}
+          {/* 封面区域 (保持不变) */}
           <div style={{ position: "relative", aspectRatio: "1/1" }}>
             <img src={config.cover} key={activeId + idx} style={{ width: "100%", height: "100%", objectFit: "cover", animation: "fadeup .5s ease" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom,transparent 50%,rgba(14,6,2,0.95))" }} />
@@ -276,14 +281,28 @@ function PlayerContent() {
               </button>
             </div>
 
-            {/* 频谱图 */}
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 36, margin: "20px 0" }}>
+            {/* --- 频谱图 (样式修改点) --- */}
+            <div style={{ 
+              display: "flex", 
+              alignItems: "flex-end", 
+              gap: "1.5px", // 缩小间距，使其看起来更密集
+              height: 32, // 略微减小总高度
+              margin: "20px 0",
+              padding: "0 2px" // 侧边微调
+            }}>
               {vData.map((h, i) => (
-                <div key={i} style={{ flex: 1, height: h, borderRadius: 4, background: (i / 22) * 100 < pct ? "#f5a623" : "rgba(255,255,255,0.15)", transition: "height 0.1s ease" }} />
+                <div key={i} style={{ 
+                  flex: 1, // 自动填满空间
+                  maxWidth: "3.5px", // **最核心修改**：让柱子变细
+                  height: h, 
+                  borderRadius: "1px", // 圆角相应变小
+                  background: (i / VISUALIZER_BARS) * 100 < pct ? "#f5a623" : "rgba(255,255,255,0.12)", 
+                  transition: "height 0.08s ease" // 频率映射更精细，过渡可以稍微快一点
+                }} />
               ))}
             </div>
 
-            {/* 进度条 */}
+            {/* 进度条控制 (保持不变) */}
             <div style={{ position: "relative", height: 20, display: "flex", alignItems: "center" }}>
               <div style={{ position: "absolute", left: 0, right: 0, height: 3, borderRadius: 4, background: "rgba(255,255,255,.1)" }}>
                 <div style={{ height: "100%", width: pct + "%", background: "linear-gradient(90deg,#d85510,#f5a623)", borderRadius: 4 }} />
