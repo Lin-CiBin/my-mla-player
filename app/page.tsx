@@ -72,7 +72,7 @@ function PlayerContent() {
   const tracks = config.tracks;
   const track = tracks[idx] || tracks[0];
 
-  // --- 1. URL 初始化与清洗 ---
+  // --- 1. URL 清洗 ---
   useEffect(() => {
     const idFromUrl = searchParams.get("id");
     if (idFromUrl && LIBRARIES[idFromUrl]) {
@@ -86,52 +86,47 @@ function PlayerContent() {
     }
   }, [searchParams]);
 
-  // --- 2. 核心修改：处理后台锁屏逻辑 ---
+  // --- 2. 核心：初始化或恢复频谱 ---
+  // 注意：不再在 togglePlay 时就强行初始化，而是按需初始化
+  const initVisualizer = () => {
+    if (!audioRef.current || document.hidden) return;
+    
+    try {
+      if (!ctxRef.current) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        ctxRef.current = new AudioContextClass();
+        analyzerRef.current = ctxRef.current.createAnalyser();
+        analyzerRef.current.fftSize = 128;
+        sourceRef.current = ctxRef.current.createMediaElementSource(audioRef.current);
+        
+        // 重要：这里只连接到 analyzer，而让 audio 标签保持原本的输出路径
+        sourceRef.current.connect(analyzerRef.current);
+        analyzerRef.current.connect(ctxRef.current.destination);
+      }
+      
+      if (ctxRef.current.state === "suspended") {
+        ctxRef.current.resume();
+      }
+    } catch (e) {
+      console.log("Visualizer blocked by browser policy, but audio should still play.");
+    }
+  };
+
+  // --- 3. 处理后台状态变化 ---
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // 页面隐藏（锁屏）时，挂起 AudioContext 以释放对音频通道的强制占用
-        if (ctxRef.current && ctxRef.current.state === "running") {
-          ctxRef.current.suspend();
-        }
-      } else {
-        // 页面回到前台，恢复 AudioContext
-        if (ctxRef.current && ctxRef.current.state === "suspended" && playing) {
-          ctxRef.current.resume();
-        }
+      if (!document.hidden && playing) {
+        // 回到前台时，尝试启动/恢复频谱
+        initVisualizer();
       }
     };
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [playing]);
 
-  // --- 3. 频谱分析初始化 (改进版：采用并行连接) ---
-  const initAudioContext = () => {
-    if (ctxRef.current || !audioRef.current) return;
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx = new AudioContextClass();
-    const analyzer = ctx.createAnalyser();
-    const source = ctx.createMediaElementSource(audioRef.current);
-    
-    analyzer.fftSize = 128;
-    
-    // 【关键修改】并行连接：
-    // 1. source -> analyzer (用于绘图)
-    // 2. source -> destination (原始音频直连输出，不被分析器阻塞)
-    source.connect(analyzer);
-    source.connect(ctx.destination); 
-    // 注意：不再调用 analyzer.connect(ctx.destination)，防止双重输出或锁屏截断
-
-    ctxRef.current = ctx;
-    analyzerRef.current = analyzer;
-    sourceRef.current = source;
-  };
-
-  // --- 4. 频谱动画 ---
+  // --- 4. 频谱动画循环 ---
   useEffect(() => {
     const updateVisualizer = () => {
-      // 只有在页面可见且正在播放时才计算频谱
       if (playing && analyzerRef.current && !document.hidden) {
         const dataArray = new Uint8Array(analyzerRef.current.frequencyBinCount);
         analyzerRef.current.getByteFrequencyData(dataArray);
@@ -141,7 +136,7 @@ function PlayerContent() {
           return 4 + (dataArray[i * step] / 255) * 28 * decay;
         });
         setVData(bars);
-      } else if (!playing || document.hidden) {
+      } else {
         setVData(prev => prev.map(v => Math.max(4, v * 0.92)));
       }
       animationRef.current = requestAnimationFrame(updateVisualizer);
@@ -153,8 +148,6 @@ function PlayerContent() {
   // --- 5. 播放控制 ---
   const togglePlay = async () => {
     if (!audioRef.current) return;
-    if (!ctxRef.current) initAudioContext();
-    if (ctxRef.current?.state === "suspended") await ctxRef.current.resume();
 
     if (playing) {
       audioRef.current.pause();
@@ -163,7 +156,9 @@ function PlayerContent() {
       try {
         await audioRef.current.play();
         setPlaying(true);
-      } catch (err) { console.error(err); }
+        // 播放开始后，尝试静默初始化频谱（如果被拦截也没关系）
+        initVisualizer();
+      } catch (err) { console.error("Play error:", err); }
     }
   };
 
@@ -186,10 +181,10 @@ function PlayerContent() {
     setCur(0);
     setQueue(false);
     setTimeout(() => {
-      if (ctxRef.current?.state === "suspended") ctxRef.current.resume();
       audioRef.current?.play();
       setPlaying(true);
-    }, 10);
+      initVisualizer();
+    }, 50);
   };
 
   const prev = () => goTo((idx - 1 + tracks.length) % tracks.length);
@@ -213,6 +208,7 @@ function PlayerContent() {
       padding: 16, overflow: "hidden", position: "relative", fontFamily: "'DM Sans',sans-serif",
       background: "#000"
     }}>
+      {/* 动态毛玻璃背景 */}
       <div style={{
         position: "absolute", inset: -20, zIndex: 0,
         backgroundImage: `url(${config.cover})`, backgroundSize: "cover", backgroundPosition: "center",
@@ -237,7 +233,7 @@ function PlayerContent() {
         ref={audioRef} 
         src={track.src} 
         crossOrigin="anonymous"
-        playsInline // 必须：允许 iOS 在线播放
+        playsInline
         webkit-playsinline="true"
         onTimeUpdate={() => !isDragging.current && setCur(audioRef.current?.currentTime || 0)} 
         onLoadedMetadata={() => setDur(audioRef.current?.duration || 0)} 
